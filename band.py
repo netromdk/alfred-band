@@ -3,6 +3,7 @@
 
 import sys
 from HTMLParser import HTMLParser
+from urllib import quote
 from workflow import Workflow3, web
 from workflow.notify import notify
 
@@ -46,7 +47,7 @@ def parse_link(link):
 def search_metal_archives(text):
   results = []
   data = web.get('https://www.metal-archives.com/search/ajax-band-search/?field=name&query={}'
-                 .format(text)).json()
+                 .format(quote(text))).json()
   if 'error' in data:
     error = data['error']
     if len(error) > 0:
