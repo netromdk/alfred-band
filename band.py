@@ -78,13 +78,58 @@ def search(text):
   # TODO: Search other sites later..
   return search_metal_archives(text)
 
+def levdist(a, b):
+  if not a and b:
+    return len(b)
+  if not b and a:
+    return len(a)
+  if not a and not b:
+    raise Exception("You have to supply two non-empty strings!")
+
+  a = " "+a;
+  m = len(a)
+  b = " "+b;
+  n = len(b)
+
+  # matrix with m+1 rows and n+1 columns
+  d = {}
+  for i in range(m): d[i, 0] = i
+  for j in range(n): d[0, j] = j
+
+  for j in range(1, n):
+    for i in range(1, m):
+      if a[i] == b[j]:
+        d[i, j] = d[i-1, j-1]
+      else:
+        d[i, j] = min(d[i-1,   j] + 1,
+                      d[  i, j-1] + 1,
+                      d[i-1, j-1] + 1)
+
+  return d[m-1, n-1]
+
+# Sort results so that the ones with the least edit distance to the input text are first! It also
+# checks if input text is contained in only one of them.
+def sort_results(results, text):
+  text = text.strip().lower()
+  def lt(x, y):
+    x = x.band.strip().lower()
+    y = y.band.strip().lower()
+    if text in x and not text in y:
+      return -1
+    if not text in x and text in y:
+      return 1
+    return levdist(x, text) < levdist(y, text)
+  return sorted(results, cmp = lt)
+
 def main(wf):
   args = wf.args
 
-  results = search(args[0])
+  text = args[0].strip().lower()
+  results = search(text)
   if len(results) == 0:
     wf.add_item(title = u'No results found.. Try with another query.')
   else:
+    results = sort_results(results, text)
     for result in results:
       wf.add_item(title = result.title(), subtitle = result.url, arg = result.url, valid = True)
 
