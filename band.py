@@ -7,11 +7,20 @@ from workflow import Workflow3, web
 from workflow.notify import notify
 
 class Result:
-  def __init__(self, band, genre, country, url):
+  def __init__(self, band, url, genre = None, country = None):
     self.band = band
+    self.url = url
     self.genre = genre
     self.country = country
-    self.url = url
+
+  def title(self):
+    subtexts = []
+    if self.genre:
+      subtexts.append(self.genre)
+    if self.country:
+      subtexts.append(self.country)
+    subtext = u' ({})'.format(", ".join(subtexts)) if len(subtexts) > 0 else ""
+    return u'{}{}'.format(self.band, subtext)
 
 class LinkParser(HTMLParser):
   def __init__(self):
@@ -60,7 +69,7 @@ def search_metal_archives(text):
     if not band or not url:
       continue
 
-    results.append(Result(band, genre, country, url))
+    results.append(Result(band, url, genre, country))
 
   return results
 
@@ -75,9 +84,9 @@ def main(wf):
   results = search(args[0])
   if len(results) == 0:
     wf.add_item(title = u'No results found.. Try with another query.')
-  for result in results:
-    wf.add_item(title = u'{} ({}, {})'.format(result.band, result.genre, result.country),
-                subtitle = result.url, arg = result.url, valid = True)
+  else:
+    for result in results:
+      wf.add_item(title = result.title(), subtitle = result.url, arg = result.url, valid = True)
 
   wf.send_feedback()
 
