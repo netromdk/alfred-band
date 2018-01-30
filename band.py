@@ -131,7 +131,7 @@ def workflow_file_path(local_path):
 def make_allmusic_query_result(text):
   return Result(u'Search on AllMusic.com for "{}"'.format(text),
                 u'https://www.allmusic.com/search/all/{}'.format(text),
-                icon = u'/Applications/Safari.app', icon_type = u'fileicon')
+                icon = workflow_file_path(u'gfx/browser.png'))
 
 def make_wikipedia_query_result(text):
   return Result(u'Search on Wikipedia for "{}"'.format(text),
