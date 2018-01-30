@@ -73,11 +73,6 @@ def search_metal_archives(text):
 
   return results
 
-# Search for text and return instances of Result.
-def search(text):
-  # TODO: Search other sites later..
-  return search_metal_archives(text)
-
 def levdist(a, b):
   if not a and b:
     return len(b)
@@ -121,19 +116,22 @@ def sort_results(results, text):
     return levdist(x, text) < levdist(y, text)
   return sorted(results, cmp = lt)
 
+# Search for text and return a sorted list of instances of Result.
+def search(text):
+  # TODO: Search other sites later..
+  results = search_metal_archives(text)
+  return sort_results(results, text)[0:50]
+
 def main(wf):
   args = wf.args
-
   text = args[0].strip().lower()
-  results = search(text)
+
+  # Cache results for one minute keyed to the search text.
+  results = wf.cached_data(text, lambda: search(text), max_age = 60)
+
   if len(results) == 0:
     wf.add_item(title = u'No results found.. Try with another query.')
   else:
-    results = sort_results(results, text)
-
-    # Limit to 50 results.
-    results = results[0:50]
-
     for result in results:
       wf.add_item(title = result.title(), subtitle = result.url, arg = result.url, valid = True)
 
