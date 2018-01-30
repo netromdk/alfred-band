@@ -7,7 +7,21 @@
 	<key>category</key>
 	<string>Tools</string>
 	<key>connections</key>
-	<dict/>
+	<dict>
+		<key>2567101F-6863-43CC-80BB-70FF2A8FBADD</key>
+		<array>
+			<dict>
+				<key>destinationuid</key>
+				<string>331CF4CA-26F4-4EBB-8D2B-6BC3CDD94BEC</string>
+				<key>modifiers</key>
+				<integer>0</integer>
+				<key>modifiersubtext</key>
+				<string></string>
+				<key>vitoclose</key>
+				<false/>
+			</dict>
+		</array>
+	</dict>
 	<key>createdby</key>
 	<string>Morten Slot Kristensen</string>
 	<key>description</key>
@@ -65,6 +79,25 @@
 			<key>version</key>
 			<integer>2</integer>
 		</dict>
+		<dict>
+			<key>config</key>
+			<dict>
+				<key>browser</key>
+				<string></string>
+				<key>spaces</key>
+				<string></string>
+				<key>url</key>
+				<string>{query}</string>
+				<key>utf8</key>
+				<true/>
+			</dict>
+			<key>type</key>
+			<string>alfred.workflow.action.openurl</string>
+			<key>uid</key>
+			<string>331CF4CA-26F4-4EBB-8D2B-6BC3CDD94BEC</string>
+			<key>version</key>
+			<integer>1</integer>
+		</dict>
 	</array>
 	<key>readme</key>
 	<string>This workflow for Alfred app enables to search for bands.
@@ -76,6 +109,13 @@ Type "band" and the band name afterwards to search.</string>
 		<dict>
 			<key>xpos</key>
 			<integer>50</integer>
+			<key>ypos</key>
+			<integer>40</integer>
+		</dict>
+		<key>331CF4CA-26F4-4EBB-8D2B-6BC3CDD94BEC</key>
+		<dict>
+			<key>xpos</key>
+			<integer>260</integer>
 			<key>ypos</key>
 			<integer>40</integer>
 		</dict>

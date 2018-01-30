@@ -2,20 +2,82 @@
 # encoding: utf-8
 
 import sys
-from workflow import Workflow3
+from HTMLParser import HTMLParser
+from workflow import Workflow3, web
+from workflow.notify import notify
 
-# Search for text and return tuples of (title, subtitle).
+class Result:
+  def __init__(self, band, genre, country, url):
+    self.band = band
+    self.genre = genre
+    self.country = country
+    self.url = url
+
+class LinkParser(HTMLParser):
+  def __init__(self):
+    HTMLParser.__init__(self)
+    self.text = None
+    self.url = None
+
+  def handle_starttag(self, tag, attrs):
+    for attr in attrs:
+      if attr[0] == u'href':
+        self.url = attr[1]
+
+  def handle_data(self, data):
+    if not self.text:
+      self.text = data
+
+# Parses "<a href=URL>TEXT</a>" into (TEXT, URL).
+def parse_link(link):
+  parser = LinkParser()
+  parser.feed(link)
+  return (parser.text, parser.url)
+
+def search_metal_archives(text):
+  results = []
+  data = web.get('https://www.metal-archives.com/search/ajax-band-search/?field=name&query={}'
+                 .format(text)).json()
+  if 'error' in data:
+    error = data['error']
+    if len(error) > 0:
+      notify(u'Band search error!', error)
+      return results
+
+  if not 'aaData' in data:
+    return results
+
+  # Each result is on the following form:
+  # ["<a href=\"https://www.metal-archives.com/bands/BAND/NUMBER\">BAND</a>  <!-- LOAD TIME -->" ,
+  #  "GENRE",
+  #  "COUNTRY"]
+  for res in data['aaData']:
+    if len(res) < 3:
+      continue
+
+    (link, genre, country) = res
+    (band, url) = parse_link(link)
+    if not band or not url:
+      continue
+
+    results.append(Result(band, genre, country, url))
+
+  return results
+
+# Search for text and return instances of Result.
 def search(text):
-  items = []
-  # TODO: Search some web API here!
-  return items
+  # TODO: Search other sites later..
+  return search_metal_archives(text)
 
 def main(wf):
   args = wf.args
 
-  items = search(args[0])
-  for item in items:
-    wf.add_item(item[0], item[1])
+  results = search(args[0])
+  if len(results) == 0:
+    wf.add_item(title = u'No results found.. Try with another query.')
+  for result in results:
+    wf.add_item(title = u'{} ({}, {})'.format(result.band, result.genre, result.country),
+                subtitle = result.url, arg = result.url, valid = True)
 
   wf.send_feedback()
 
