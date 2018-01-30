@@ -13,6 +13,8 @@ class Result:
     self.url = url
     self.genre = genre
     self.country = country
+    self.icon = None
+    self.icon_type = None
 
   def title(self):
     subtexts = []
@@ -22,6 +24,10 @@ class Result:
       subtexts.append(self.country)
     subtext = u' ({})'.format(", ".join(subtexts)) if len(subtexts) > 0 else ""
     return u'{}{}'.format(self.band, subtext)
+
+  def set_icon(self, icon, icon_type):
+    self.icon = icon
+    self.icon_type = icon_type
 
 class LinkParser(HTMLParser):
   def __init__(self):
@@ -117,11 +123,21 @@ def sort_results(results, text):
     return levdist(x, text) < levdist(y, text)
   return sorted(results, cmp = lt)
 
+def make_allmusic_query_result(text):
+  res = Result(u'Search on AllMusic.com for "{}"'.format(text),
+               u'https://www.allmusic.com/search/all/{}'.format(text))
+  res.set_icon(u'/Applications/Safari.app', u'fileicon')
+  return res
+
 # Search for text and return a sorted list of instances of Result.
 def search(text):
   # TODO: Search other sites later..
   results = search_metal_archives(text)
   return sort_results(results, text)[0:50]
+
+def add_result_item(result, wf):
+  wf.add_item(title = result.title(), subtitle = result.url, arg = result.url, valid = True,
+              icon=result.icon, icontype=result.icon_type)
 
 def main(wf):
   args = wf.args
@@ -134,7 +150,10 @@ def main(wf):
     wf.add_item(title = u'No results found.. Try with another query.')
   else:
     for result in results:
-      wf.add_item(title = result.title(), subtitle = result.url, arg = result.url, valid = True)
+      add_result_item(result, wf)
+
+  # Add alternative search on AllMusic.com.
+  add_result_item(make_allmusic_query_result(text), wf)
 
   wf.send_feedback()
 
