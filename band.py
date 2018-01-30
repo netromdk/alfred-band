@@ -1,9 +1,11 @@
 #!/usr/bin/python
 # encoding: utf-8
 
+import os
 import sys
+
 from HTMLParser import HTMLParser
-from urllib import quote
+from urllib import quote, quote_plus
 from workflow import Workflow3, web
 from workflow.notify import notify
 
@@ -123,10 +125,19 @@ def sort_results(results, text):
     return levdist(x, text) < levdist(y, text)
   return sorted(results, cmp = lt)
 
+def workflow_file_path(local_path):
+  return os.path.join(os.path.dirname(os.path.abspath(__file__)), local_path)
+
 def make_allmusic_query_result(text):
   return Result(u'Search on AllMusic.com for "{}"'.format(text),
                 u'https://www.allmusic.com/search/all/{}'.format(text),
                 icon = u'/Applications/Safari.app', icon_type = u'fileicon')
+
+def make_wikipedia_query_result(text):
+  return Result(u'Search on Wikipedia for "{}"'.format(text),
+                u'https://en.wikipedia.org/w/index.php?search={}'
+                .format(quote_plus(text + u' (band)')),
+                icon = workflow_file_path(u'gfx/wikipedia.png'))
 
 # Search for text and return a sorted list of instances of Result.
 def search(text):
@@ -147,8 +158,9 @@ def main(wf):
   for result in results:
     result.add_to_workflow(wf)
 
-  # Add alternative search on AllMusic.com.
+  # Add alternative searches.
   make_allmusic_query_result(text).add_to_workflow(wf)
+  make_wikipedia_query_result(text).add_to_workflow(wf)
 
   wf.send_feedback()
 
