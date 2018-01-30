@@ -130,6 +130,10 @@ def main(wf):
     wf.add_item(title = u'No results found.. Try with another query.')
   else:
     results = sort_results(results, text)
+
+    # Limit to 50 results.
+    results = results[0:50]
+
     for result in results:
       wf.add_item(title = result.title(), subtitle = result.url, arg = result.url, valid = True)
 
