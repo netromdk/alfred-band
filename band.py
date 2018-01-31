@@ -1,6 +1,8 @@
 #!/usr/bin/python
 # encoding: utf-8
 
+from __future__ import unicode_literals
+
 import os
 import sys
 
@@ -24,11 +26,11 @@ class Result:
       subtexts.append(self.genre)
     if self.country:
       subtexts.append(self.country)
-    subtext = u' ({})'.format(", ".join(subtexts)) if len(subtexts) > 0 else ""
-    return u'{}{}'.format(self.band, subtext)
+    subtext = ' ({})'.format(", ".join(subtexts)) if len(subtexts) > 0 else ""
+    return '{}{}'.format(self.band, subtext)
 
   def add_to_workflow(self, wf):
-    url = u'' if self.url is None else self.url
+    url = '' if self.url is None else self.url
     wf.add_item(title = self.title(), subtitle = url, arg = self.url,
                 valid = not self.url is None, icon = self.icon, icontype = self.icon_type)
 
@@ -40,7 +42,7 @@ class LinkParser(HTMLParser):
 
   def handle_starttag(self, tag, attrs):
     for attr in attrs:
-      if attr[0] == u'href':
+      if attr[0] == 'href':
         self.url = attr[1]
 
   def handle_data(self, data):
@@ -59,12 +61,12 @@ def search_metal_archives(text):
     data = web.get('https://www.metal-archives.com/search/ajax-band-search/?field=name&query={}'
                    .format(quote(text))).json()
   except Exception as err:
-    return [Result(u'Something went wrong! Please check your internet connection..')]
+    return [Result('Something went wrong! Please check your internet connection..')]
 
   if 'error' in data:
     error = data['error']
     if len(error) > 0:
-      notify(u'Band search error!', error)
+      notify('Band search error!', error)
       return results
 
   if not 'aaData' in data:
@@ -134,15 +136,15 @@ def workflow_file_path(local_path):
   return os.path.join(os.path.dirname(os.path.abspath(__file__)), local_path)
 
 def make_allmusic_query_result(text):
-  return Result(u'Search on AllMusic.com for "{}"'.format(text),
-                u'https://www.allmusic.com/search/all/{}'.format(text),
-                icon = workflow_file_path(u'gfx/browser.png'))
+  return Result('Search on AllMusic.com for "{}"'.format(text),
+                'https://www.allmusic.com/search/all/{}'.format(text),
+                icon = workflow_file_path('gfx/browser.png'))
 
 def make_wikipedia_query_result(text):
-  return Result(u'Search on Wikipedia for "{}"'.format(text),
-                u'https://en.wikipedia.org/w/index.php?search={}'
-                .format(quote_plus(text + u' (band)')),
-                icon = workflow_file_path(u'gfx/wikipedia.png'))
+  return Result('Search on Wikipedia for "{}"'.format(text),
+                'https://en.wikipedia.org/w/index.php?search={}'
+                .format(quote_plus(text + ' (band)')),
+                icon = workflow_file_path('gfx/wikipedia.png'))
 
 # Search for text and return a sorted list of instances of Result.
 def search(text):
@@ -158,7 +160,7 @@ def main(wf):
   results = wf.cached_data(text, lambda: search(text), max_age = 60)
 
   if len(results) == 0:
-    wf.add_item(title = u'No results found.. Try with another query.')
+    wf.add_item(title = 'No results found.. Try with another query.')
 
   for result in results:
     result.add_to_workflow(wf)
