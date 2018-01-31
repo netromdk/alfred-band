@@ -7,7 +7,6 @@ import os
 import sys
 
 from HTMLParser import HTMLParser
-from urllib import quote, quote_plus
 from workflow import Workflow3, web
 from workflow.notify import notify
 
@@ -57,11 +56,11 @@ def parse_link(link):
 
 def search_metal_archives(text):
   results = []
-  try:
-    data = web.get('https://www.metal-archives.com/search/ajax-band-search/?field=name&query={}'
-                   .format(quote(text))).json()
-  except Exception as err:
-    return [Result('Something went wrong! Please check your internet connection..')]
+
+  r = web.get('https://www.metal-archives.com/search/ajax-band-search/',
+              {'field': 'name', 'query': text})
+  r.raise_for_status()
+  data = r.json()
 
   if 'error' in data:
     error = data['error']
@@ -143,7 +142,7 @@ def make_allmusic_query_result(text):
 def make_wikipedia_query_result(text):
   return Result('Search on Wikipedia for "{}"'.format(text),
                 'https://en.wikipedia.org/w/index.php?search={}'
-                .format(quote_plus(text + ' (band)')),
+                .format(text + ' (band)'),
                 icon = workflow_file_path('gfx/wikipedia.png'))
 
 # Search for text and return a sorted list of instances of Result.
