@@ -10,7 +10,7 @@ from workflow import Workflow3, web
 from workflow.notify import notify
 
 class Result:
-  def __init__(self, band, url, genre = None, country = None, icon = None, icon_type = None):
+  def __init__(self, band, url = None, genre = None, country = None, icon = None, icon_type = None):
     self.band = band
     self.url = url
     self.genre = genre
@@ -28,8 +28,9 @@ class Result:
     return u'{}{}'.format(self.band, subtext)
 
   def add_to_workflow(self, wf):
-    wf.add_item(title = self.title(), subtitle = self.url, arg = self.url, valid = True,
-                icon = self.icon, icontype = self.icon_type)
+    url = u'' if self.url is None else self.url
+    wf.add_item(title = self.title(), subtitle = url, arg = self.url,
+                valid = not self.url is None, icon = self.icon, icontype = self.icon_type)
 
 class LinkParser(HTMLParser):
   def __init__(self):
@@ -54,8 +55,12 @@ def parse_link(link):
 
 def search_metal_archives(text):
   results = []
-  data = web.get('https://www.metal-archives.com/search/ajax-band-search/?field=name&query={}'
-                 .format(quote(text))).json()
+  try:
+    data = web.get('https://www.metal-archives.com/search/ajax-band-search/?field=name&query={}'
+                   .format(quote(text))).json()
+  except Exception as err:
+    return [Result(u'Something went wrong! Please check your internet connection..')]
+
   if 'error' in data:
     error = data['error']
     if len(error) > 0:
