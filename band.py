@@ -33,6 +33,17 @@ class Result:
     wf.add_item(title = self.title(), subtitle = url, arg = self.url,
                 valid = not self.url is None, icon = self.icon, icontype = self.icon_type)
 
+  def __eq__(self, other):
+    return (self.band == other.band) and \
+      (self.url == other.url) and \
+      (self.genre == other.genre) and \
+      (self.country == other.country) and \
+      (self.icon == other.icon) and \
+      (self.icon_type == other.icon_type)
+
+  def __hash__(self):
+    return hash((self.band, self.url, self.genre, self.country, self.icon, self.icon_type))
+
 class LinkParser(HTMLParser):
   def __init__(self):
     HTMLParser.__init__(self)
@@ -148,7 +159,9 @@ def make_wikipedia_query_result(text):
 # Search for text and return a sorted list of instances of Result.
 def search(text):
   # TODO: Search other sites later..
-  results = search_metal_archives(text)
+  results = []
+  results += search_metal_archives(text)
+  results = set(results) # Remove duplicates.
   return sort_results(results, text)[0:50]
 
 def main(wf):
