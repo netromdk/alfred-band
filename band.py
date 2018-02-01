@@ -7,7 +7,7 @@ import os
 import sys
 
 from HTMLParser import HTMLParser
-from workflow import Workflow3, web
+from workflow import Workflow3, web, ICON_INFO
 from workflow.notify import notify
 
 class Result:
@@ -152,6 +152,11 @@ def search(text):
   return sort_results(results, text)[0:50]
 
 def main(wf):
+  if wf.update_available:
+    wf.add_item('New version available',
+                'Action this item to install the update',
+                autocomplete= 'workflow:update', icon = ICON_INFO)
+
   args = wf.args
   text = args[0].strip().lower()
 
@@ -171,5 +176,5 @@ def main(wf):
   wf.send_feedback()
 
 if __name__ == '__main__':
-  wf = Workflow3()
+  wf = Workflow3(update_settings = {'github_slug': 'netromdk/alfred-band', 'frequency': 7})
   sys.exit(wf.run(main))
