@@ -121,7 +121,7 @@ Type "band" and the band name afterwards to search.</string>
 		</dict>
 	</dict>
 	<key>version</key>
-	<string>0.0.2</string>
+	<string>0.1.0</string>
 	<key>webaddress</key>
 	<string>https://github.com/netromdk/alfred-band</string>
 </dict>
