@@ -7,7 +7,7 @@ import os
 import sys
 
 from HTMLParser import HTMLParser
-from workflow import Workflow3, web, ICON_INFO
+from workflow import Workflow3, web, ICON_INFO, ICON_WEB, ICON_NOTE, ICON_SYNC
 from workflow.notify import notify
 
 class Result:
@@ -146,15 +146,13 @@ def workflow_file_path(local_path):
   return os.path.join(os.path.dirname(os.path.abspath(__file__)), local_path)
 
 def make_allmusic_query_result(text):
-  return Result('Search on AllMusic.com for "{}"'.format(text),
-                'https://www.allmusic.com/search/all/{}'.format(text),
-                icon = workflow_file_path('gfx/browser.png'))
+  return Result('Search AllMusic for "{}"'.format(text),
+                'https://www.allmusic.com/search/all/{}'.format(text), icon = ICON_WEB)
 
 def make_wikipedia_query_result(text):
-  return Result('Search on Wikipedia for "{}"'.format(text),
-                'https://en.wikipedia.org/w/index.php?search={}'
-                .format(text + ' (band)'),
-                icon = workflow_file_path('gfx/wikipedia.png'))
+  return Result('Search Wikipedia for "{}"'.format(text),
+                'https://en.wikipedia.org/w/index.php?search={}'.format(text + ' (band)'),
+                icon = ICON_WEB)
 
 # Search for text and return a sorted list of instances of Result.
 def search(text):
@@ -168,7 +166,7 @@ def main(wf):
   if wf.update_available:
     wf.add_item('New version available',
                 'Action this item to install the update',
-                autocomplete= 'workflow:update', icon = ICON_INFO)
+                autocomplete = 'workflow:update', icon = ICON_SYNC)
 
   args = wf.args
   text = args[0].strip().lower()
@@ -177,7 +175,7 @@ def main(wf):
   results = wf.cached_data(text, lambda: search(text), max_age = 60)
 
   if len(results) == 0:
-    wf.add_item(title = 'No results found.. Try with another query.')
+    wf.add_item(title = 'No results found.. Try with another query.', icon = ICON_NOTE)
 
   for result in results:
     result.add_to_workflow(wf)
