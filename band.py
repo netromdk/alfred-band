@@ -6,6 +6,7 @@ from __future__ import unicode_literals
 import os
 import sys
 
+from multiprocessing import Process, Queue
 from HTMLParser import HTMLParser
 from workflow import Workflow3, web, ICON_INFO, ICON_WEB, ICON_NOTE, ICON_SYNC
 from workflow.notify import notify
@@ -65,7 +66,7 @@ def parse_link(link):
   parser.feed(link)
   return (parser.text, parser.url)
 
-def search_metal_archives(text, field = 'name'):
+def search_metal_archives(queue, text, field = 'name'):
   results = []
 
   r = web.get('https://www.metal-archives.com/search/ajax-band-search/',
@@ -77,10 +78,10 @@ def search_metal_archives(text, field = 'name'):
     error = data['error']
     if len(error) > 0:
       notify('Band search error!', error)
-      return results
+      return
 
   if not 'aaData' in data:
-    return results
+    return
 
   # Each result is on the following form:
   # ["<a href=\"https://www.metal-archives.com/bands/BAND/NUMBER\">BAND</a>  <!-- LOAD TIME -->" ,
@@ -97,7 +98,7 @@ def search_metal_archives(text, field = 'name'):
 
     results.append(Result(band, url, genre, country))
 
-  return results
+  queue.put(results)
 
 def levdist(a, b):
   if not a and b:
@@ -154,12 +155,25 @@ def make_wikipedia_query_result(text):
                 'https://en.wikipedia.org/w/index.php?search={}'.format(text + ' (band)'),
                 icon = ICON_WEB)
 
-# Search for text and return a sorted list of instances of Result.
+# Concurrently search for text and return a sorted list of instances of Result.
 def search(text):
   # TODO: Search other sites later..
+
+  queue = Queue()
+
+  procs = (Process(target = search_metal_archives, args = (queue, text, 'name')),
+           Process(target = search_metal_archives, args = (queue, text, 'genre')))
+
+  # Retrieve information.
+  for proc in procs: proc.start()
+
+  # Wait for all threads to complete.
+  for proc in procs: proc.join()
+
   results = []
-  results += search_metal_archives(text, field = 'name')
-  results += search_metal_archives(text, field = 'genre')
+  while not queue.empty():
+    results += queue.get_nowait()
+
   results = set(results) # Remove duplicates.
   return sort_results(results, text)[0:50]
 
