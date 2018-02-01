@@ -65,11 +65,11 @@ def parse_link(link):
   parser.feed(link)
   return (parser.text, parser.url)
 
-def search_metal_archives(text):
+def search_metal_archives(text, field = 'name'):
   results = []
 
   r = web.get('https://www.metal-archives.com/search/ajax-band-search/',
-              {'field': 'name', 'query': text})
+              {'field': field, 'query': text})
   r.raise_for_status()
   data = r.json()
 
@@ -158,7 +158,8 @@ def make_wikipedia_query_result(text):
 def search(text):
   # TODO: Search other sites later..
   results = []
-  results += search_metal_archives(text)
+  results += search_metal_archives(text, field = 'name')
+  results += search_metal_archives(text, field = 'genre')
   results = set(results) # Remove duplicates.
   return sort_results(results, text)[0:50]
 
